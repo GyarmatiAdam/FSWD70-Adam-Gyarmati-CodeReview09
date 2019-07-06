@@ -241,3 +241,53 @@ INSERT INTO availability (fk_car_id, av_date, av_description) VALUES
 (7,'2019-01-01','Available'),
 (8,'2019-01-01','Available'),
 (9,'2019-01-01','Available');
+
+/*--------------------------------MySQL queries from here------------------------------------------*/
+
+/*All customers aged more than 30 years old*/
+SELECT first_name, last_name, YEAR(CURDATE()) - YEAR(dob) AS age 
+FROM customers;
+
+/*Customers, who payed more as AVG for car rental*/
+SELECT first_name, last_name, price
+FROM customers
+INNER JOIN bookings
+ON customers.fk_book_id = bookings.book_id
+INNER JOIN cars
+ON cars.fk_book_id = bookings.book_id
+WHERE price > (
+    SELECT AVG(price)
+    FROM cars
+);
+
+/*All bookings, which had "None" or "30%" discount*/
+SELECT book_id, dis_description
+FROM bookings
+RIGHT JOIN cars
+ON bookings.book_id = cars.fk_book_id
+LEFT JOIN discount
+ON cars.car_id = discount.fk_car_id
+WHERE (dis_description LIKE "None") OR (dis_description LIKE "30%");
+
+/*All email addresses from database*/
+SELECT c_email, r_email
+FROM customers
+JOIN bookings
+ON customers.fk_book_id = bookings.book_id
+JOIN car_rental
+ON bookings.book_id = car_rental.fk_book_id;
+
+/*Select all the customers, who has a in name both the "C" and " D" letters*/
+SELECT first_name, last_name
+FROM customers
+WHERE (first_name LIKE "%c%") AND (last_name LIKE "%d%")
+OR (first_name LIKE "%d%") AND (last_name LIKE "%c%");
+
+/*Select all payments with type "Card"*/
+SELECT pay_status AS "Status", inv_date AS "Invoice date", fk_book_id AS "Booking ID" 
+FROM payments
+RIGHT JOIN payment_type
+ON payments.fk_type_id = payment_type.type_id
+RIGHT JOIN invoices
+ON invoices.inv_id = payments.fk_inv_id
+WHERE pay_description LIKE "Card";
